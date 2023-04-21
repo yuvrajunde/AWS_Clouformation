@@ -1,0 +1,9 @@
+Manual steps to create a VPC
+-----------------------------
+Step1: Create VPC
+Step2: Create Subnet
+Step3: Create Route Table (Ignore default Main Route Table)
+Step4: Associate Subnet in route Table
+Step5: Create Internet gateway
+Step6: Associate Internet Gateway to VPC
+Step7: Create route to allow internet traffic via IGW 
