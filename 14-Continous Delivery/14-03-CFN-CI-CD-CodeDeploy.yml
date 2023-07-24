@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create Code Depoly Stack Template
+
+Parameters:
+  ApplicationRepoName: 
+    Type: String
+    Description: Name of the repo which contains Rest Application
+    Default: ccdemo
+  ArtifacrStoreS3Location:
+    Type: String
+    Description: Name of the S3 bucket to store codepipeline artifact.
+    Default: rest-apps-yuvraj 
+
+Resources:
+  CodeDeployServiceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName:
+        Fn::Sub: CodeDeployServiceRole-${AWS::StackName}
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codedeploy.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: "CodeDeployCICDAccessPolicy"
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ec2:DescribeInstances'
+                  - 'ec2:DescribeInstanceStatus'
+                  - 'ec2:TerminateInstances'
+                  - 'tag:GetTags'
+                  - 'tag:GetResources'
+                  - 'sns:Publish'
+                  - 'cloudwatch:DescribeAlarms'
+                  - 'cloudwatch:PutMetricAlarm'
+                Resource: '*'
+
+  CodeDeployApplication:
+    Type: AWS::CodeDeploy::Application
+    Properties: 
+      ApplicationName: !Sub RestApp-${AWS::StackName}
+      ComputePlatform: Server
+
+  CodeDeployDeploymentGroup: 
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties: 
+      ApplicationName: !Ref CodeDeployApplication
+      Ec2TagFilters: 
+        - Key: Name
+          Value: CodeDeployTesting
+          Type: "KEY_AND_VALUE"
+      ServiceRoleArn: !GetAtt [ CodeDeployServiceRole, Arn ]      
+      DeploymentGroupName: !Sub DeploymentGroup-${AWS::StackName}

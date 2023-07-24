@@ -66,6 +66,7 @@ Resources:
         Type: S3
         Location: !Ref ArtifactStoreS3Location
         Name: !Sub BuildRestAppCFN-${AWS::StackName}
+        Packaging: ZIP
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
