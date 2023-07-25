@@ -11,8 +11,19 @@ Parameters:
     Type: String
     Description: Name of the S3 bucket to store CodePipeline artificat.
     Default: rest-apps-yuvraj
+  Email:
+    Type: String
+    Description: Email Address to send Notification
+    Default: yuvrajunde80@gmail.com
 
 Resources:
+  CodePipelineSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: !Ref Email
+          Protocol: email
+
   CodeBuildRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -126,6 +137,17 @@ Resources:
           Type: "KEY_AND_VALUE"
       ServiceRoleArn: !GetAtt [ CodeDeployServiceRole, Arn ]      
       DeploymentGroupName: !Sub DeploymentGroup-${AWS::StackName}
+  
+  ProdCodeDeployDeploymentGroup: 
+    Type: "AWS::CodeDeploy::DeploymentGroup"
+    Properties: 
+      ApplicationName: !Ref CodeDeployApplication
+      Ec2TagFilters: 
+        - Key: Name
+          Value: prod
+          Type: "KEY_AND_VALUE"
+      ServiceRoleArn: !GetAtt [ CodeDeployServiceRole, Arn ]      
+      DeploymentGroupName: !Sub ProdDeploymentGroup-${AWS::StackName}
 
   CodePipelineRole:
     Type: "AWS::IAM::Role"
