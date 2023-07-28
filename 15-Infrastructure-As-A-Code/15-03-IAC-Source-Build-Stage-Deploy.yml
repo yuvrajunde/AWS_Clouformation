@@ -3,9 +3,11 @@ Parameters:
   CFNTemplateRepoName:
     Type: String
     Description: Name of the repo which contains vpc repo
+    Default: vpcrepo
   ArtifactStoreS3Location:
     Type: String
     Description: Name of the S3 bucket location
+    Default: iac01890
 Resources:
   CodeBuildRole:
     Type: "AWS::IAM::Role"
@@ -75,24 +77,24 @@ Resources:
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub CodeBuildCFN-${AWS:StackName}
+      Name: !Sub CodeBuildCFN-${AWS::StackName}
       Description: Build to Validate the CFN Templates
       ServiceRole: !GetAtt [CodeBuildRole, Arn]
       Artifacts:
         Type: S3
         Location: !Ref ArtifactStoreS3Location
-        Name: !Sub CodeBuildCFN-${AWS:StackName}
+        Name: !Sub CodeBuildCFN-${AWS::StackName}
       Environment:
         Type: LINUX_CONTAINER
-        ComputeType: BUILD_GENRAL1_SMALL
-        Image: aws/codebuild/standard:2.0
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
       Source:
         Location: https://git-codecommit.us-east-2.amazonaws.com/v1/repos/${CFNTemplateRepoName}
         Type: CODECOMMIT
       TimeoutInMinutes: 15
       Tags:
-        Key: Name
-        Value: !Sub CodeBuildCFN-${AWS:StackName}
+        - Key: Name
+          Value: !Sub CodeBuildCFN-${AWS::StackName}
   
   CodePipelineRole:
     Type: "AWS::IAM::Role"
@@ -335,7 +337,7 @@ Resources:
     Type: AWS::CodePipeline::Pipeline
     Properties:
       Name: !Sub CFN-${AWS::StackName}
-      RoleArn: !GetAtt [CodePipelineRole,Arn]
+      RoleArn: !GetAtt [CodePipelineRole, Arn]
       Stages:
         - Name: Source
           Actions:
@@ -349,7 +351,7 @@ Resources:
                 - Name: CFNSourceOutput
               Configuration:
                 BranchName: master
-                RepositoryName: !!Ref CFNTemplateRepoName
+                RepositoryName: !Ref CFNTemplateRepoName
               RunOrder: 1
         - Name: Build
           Actions:
@@ -368,7 +370,7 @@ Resources:
               RunOrder: 1
         - Name: Deploy
           Actions:
-            - Name: 
+            - Name: CodeDeploy
               InputArtifacts:
                 - Name: CFNCodeBuildOutput
               ActionTypeId:
@@ -378,16 +380,14 @@ Resources:
                 Provider: CloudFormation
               OutputArtifacts:
                 - Name: CreatedStageCFNStack
-              Configuratrion:
+              Configuration:
                 ActionMode: CREATE_UPDATE
-                RoleArn: !Gett [CloudFormationRole, Arn]
+                RoleArn: !GetAtt [CloudFormationRole, Arn]
                 Capabilities: CAPABILITY_NAMED_IAM
                 StackName: !Sub Stage-${AWS::StackName}
                 TemplateConfiguration: CFNCodeBuildOutput::vpc-config.json
                 TemplatePath: CFNCodeBuildOutput::vpc.yml
               RunOrder: 1
-
-
       ArtifactStore:
         Type: S3  
-        Location: !!Ref ArtifactStoreS3Location
+        Location: !Ref ArtifactStoreS3Location
