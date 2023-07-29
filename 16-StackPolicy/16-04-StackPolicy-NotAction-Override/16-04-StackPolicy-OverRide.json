@@ -5,12 +5,6 @@
     "Action" : "Update:*",
     "Principal": "*",
     "Resource" : "*"
-    },
-    {
-    "Effect" : "Deny",
-    "Action" : "Update:*",
-    "Principal": "*",
-    "Resource" : "LogicalResourceId/MySecurityGroup"
     }
     ]
 }    

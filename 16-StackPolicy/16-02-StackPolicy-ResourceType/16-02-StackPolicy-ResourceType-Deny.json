@@ -10,7 +10,12 @@
     "Effect" : "Deny",
     "Action" : "Update:*",
     "Principal": "*",
-    "Resource" : "LogicalResourceId/MySecurityGroup"
+    "Resource" : "*",
+    "Condition": {
+        "StringEquals" : {
+            "ResourceType": ["AWS::EC2::SecurityGroup"]
+        }
+    }
     }
     ]
 }    

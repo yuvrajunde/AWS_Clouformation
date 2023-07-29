@@ -8,9 +8,9 @@
     },
     {
     "Effect" : "Deny",
-    "Action" : "Update:*",
+    "Action" : "Update:Replace",
     "Principal": "*",
-    "Resource" : "LogicalResourceId/MySecurityGroup"
+    "Resource" : "LogicalResourceId/MyVMInstance"
     }
     ]
 }    

@@ -14,12 +14,19 @@ Resources:
         - IpProtocol: tcp
           FromPort: '22'
           ToPort: '22'
-          CidrIp: 0.0.0.0/0
+          CidrIp: 0.0.0.0/0    
+
+  MyNewSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow port 80
+      SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: '8080'          
-          ToPort: '8080'
+          FromPort: '80'
+          ToPort: '80'
           CidrIp: 0.0.0.0/0
- 
+          
+
   MyVMInstance:
     Type: AWS::EC2::Instance    
     Properties:
@@ -28,6 +35,7 @@ Resources:
       KeyName: !Ref KeyName
       SecurityGroups:
         - !Ref MySecurityGroup
+        - !Ref MyNewSG
       UserData:
         Fn::Base64: |
           #!/bin/bash
